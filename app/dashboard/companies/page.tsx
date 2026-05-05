@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDate } from '@/lib/utils'
+import CreateCompanyButton from './CreateCompanyButton'
 
 async function getCompanies() {
   const { data } = await supabaseAdmin
@@ -27,9 +28,7 @@ export default async function CompaniesPage() {
           <h1 className="text-2xl font-bold text-gray-900">公司管理</h1>
           <p className="text-sm text-gray-500 mt-1">共 {companies.length} 家公司接入平台</p>
         </div>
-        <button className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
-          + 新建公司
-        </button>
+        <CreateCompanyButton />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
