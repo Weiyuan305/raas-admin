@@ -1,17 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 interface Props {
   onClose: () => void
+  onCreated: () => void
 }
 
-export default function CreateCompanyModal({ onClose }: Props) {
-  const router = useRouter()
+export default function CreateCompanyModal({ onClose, onCreated }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
@@ -38,8 +37,7 @@ export default function CreateCompanyModal({ onClose }: Props) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || '创建失败'); return }
-      router.refresh()
-      onClose()
+      onCreated()
     } catch {
       setError('网络错误，请重试')
     } finally {

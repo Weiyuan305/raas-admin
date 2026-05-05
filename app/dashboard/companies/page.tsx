@@ -1,16 +1,10 @@
-import { supabaseAdmin } from '@/lib/supabase'
+'use client'
+
+import { useEffect, useState, useCallback } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatDate } from '@/lib/utils'
-import CreateCompanyButton from './CreateCompanyButton'
-
-async function getCompanies() {
-  const { data } = await supabaseAdmin
-    .from('companies')
-    .select('*')
-    .order('created_at', { ascending: false })
-  return data || []
-}
+import CreateCompanyModal from './CreateCompanyModal'
 
 const planLabels: Record<string, string> = {
   starter: 'Starter',
@@ -18,8 +12,33 @@ const planLabels: Record<string, string> = {
   enterprise: 'Enterprise'
 }
 
-export default async function CompaniesPage() {
-  const companies = await getCompanies()
+interface Company {
+  id: string
+  name: string
+  plan_type: string
+  status: string
+  max_consultants: number
+  monthly_ai_quota: number
+  created_at: string
+}
+
+export default function CompaniesPage() {
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+
+  const fetchCompanies = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/companies')
+      const json = await res.json()
+      setCompanies(json.data || [])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchCompanies() }, [fetchCompanies])
 
   return (
     <div className="p-8">
@@ -28,7 +47,12 @@ export default async function CompaniesPage() {
           <h1 className="text-2xl font-bold text-gray-900">公司管理</h1>
           <p className="text-sm text-gray-500 mt-1">共 {companies.length} 家公司接入平台</p>
         </div>
-        <CreateCompanyButton />
+        <button
+          onClick={() => setShowModal(true)}
+          className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+        >
+          + 新建公司
+        </button>
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -45,10 +69,19 @@ export default async function CompaniesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {companies.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-gray-400 py-12">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+                    加载中...
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : companies.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-gray-500 py-12">
-                  暂无公司数据
+                  暂无公司数据，点击「+ 新建公司」开始
                 </TableCell>
               </TableRow>
             ) : companies.map((company) => (
@@ -75,6 +108,16 @@ export default async function CompaniesPage() {
           </TableBody>
         </Table>
       </div>
+
+      {showModal && (
+        <CreateCompanyModal
+          onClose={() => setShowModal(false)}
+          onCreated={() => {
+            setShowModal(false)
+            fetchCompanies()   // 创建成功后重新拉取列表
+          }}
+        />
+      )}
     </div>
   )
 }
