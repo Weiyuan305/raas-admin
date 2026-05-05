@@ -1,7 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatDate, formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
+import Link from 'next/link'
+import ConsultantActions from './ConsultantActions'
 
 async function getConsultants() {
   const { data } = await supabaseAdmin
@@ -47,8 +49,12 @@ export default async function ConsultantsPage() {
             ) : consultants.map((c) => (
               <TableRow key={c.id} className="hover:bg-gray-50 border-b border-gray-100">
                 <TableCell>
-                  <div className="font-medium text-gray-900">{c.display_name || '—'}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{c.email}</div>
+                  <Link href={`/dashboard/consultants/${c.id}`} className="block group">
+                    <div className="font-medium text-gray-900 group-hover:text-black group-hover:underline">
+                      {c.display_name || '未设置姓名'}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">{c.email}</div>
+                  </Link>
                 </TableCell>
                 <TableCell className="text-gray-700">
                   {/* @ts-ignore */}
@@ -67,10 +73,8 @@ export default async function ConsultantsPage() {
                 </TableCell>
                 <TableCell className="text-gray-600 text-sm">{formatRelativeTime(c.created_at)}</TableCell>
                 <TableCell>
-                  <div className="flex gap-3">
-                    <button className="text-xs text-gray-600 hover:text-black font-medium transition-colors">查看案例</button>
-                    <button className="text-xs text-gray-500 hover:text-red-600 transition-colors">停用</button>
-                  </div>
+                  {/* @ts-ignore */}
+                  <ConsultantActions id={c.id} status={c.status || 'active'} name={c.display_name || c.email} />
                 </TableCell>
               </TableRow>
             ))}
