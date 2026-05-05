@@ -14,7 +14,7 @@ export default function CreateCompanyButton() {
       >
         + 新建公司
       </button>
-      {open && <CreateCompanyModal onClose={() => setOpen(false)} />}
+      {open && <CreateCompanyModal onClose={() => setOpen(false)} onCreated={() => setOpen(false)} />}
     </>
   )
 }
